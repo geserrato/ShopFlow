@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "ShopFlow.AppHost/ShopFlow.AppHost.csproj"
+  }
+}
