@@ -1,6 +1,8 @@
 using CatalogoService.DTOs;
+using CatalogoService.Mappers;
 using CatalogoService.Models;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,14 +20,10 @@ public static class ProductosEndpoints
     ];
 
     private static int _nextId = 5;
-
-    // Mapeo manual: Producto → ProductoDto
-    private static ProductoDto ToDto(Producto p) =>
-        new(p.Id, p.Nombre, p.Categoria, p.Precio, p.Stock, p.Activo);
-
+    
     public static RouteGroupBuilder MapProductos(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/productos")
+        RouteGroupBuilder group = app.MapGroup("/api/v{version:apiVersion}/productos")
             .WithTags("Catalogo ShopFlow")
             .WithOpenApi();
 
@@ -38,18 +36,21 @@ public static class ProductosEndpoints
         return group;
     }
 
-    static Ok<IEnumerable<ProductoDto>> GetAll(string? categoria = null)
+    static Ok<IEnumerable<ProductoDto>> GetAll(ProductoMapper mapper, string? categoria = null)
     {
         var lista = categoria is null
             ? _catalogo
             : _catalogo.Where(p => p.Categoria == categoria).ToList();
 
-        return TypedResults.Ok(lista.Select(ToDto));
+        return TypedResults.Ok(lista.Select(mapper.ToDto));
     }
 
-    static Results<Ok<ProductoDto>, NotFound<ProblemDetails>> GetById(int id)
+    static Results<Ok<ProductoDto>, NotFound<ProblemDetails>> GetById(
+        ProductoMapper mapper,
+        int id
+        )
     {
-        var p = _catalogo.FirstOrDefault(x => x.Id == id);
+        Producto? p = _catalogo.FirstOrDefault(x => x.Id == id);
 
         return p is null
             ? TypedResults.NotFound(new ProblemDetails
@@ -58,13 +59,15 @@ public static class ProductosEndpoints
                 Detail = $"No existe en el catálogo ShopFlow un producto con ID {id}",
                 Status = 404
             })
-            : TypedResults.Ok(ToDto(p));
+            : TypedResults.Ok(mapper.ToDto(p));
     }
 
     static async Task<Results<Created<ProductoDto>, ValidationProblem>> Create(
-        CrearProductoDto dto, IValidator<CrearProductoDto> validator)
+        CrearProductoDto dto, 
+        IValidator<CrearProductoDto> validator,
+        ProductoMapper mapper)
     {
-        var result = await validator.ValidateAsync(dto);
+        ValidationResult? result = await validator.ValidateAsync(dto);
 
         if (!result.IsValid)
             return TypedResults.ValidationProblem(result.ToDictionary());
@@ -81,18 +84,21 @@ public static class ProductosEndpoints
 
         _catalogo.Add(p);
 
-        return TypedResults.Created($"/api/productos/{p.Id}", ToDto(p));
+        return TypedResults.Created($"/api/v1/productos/{p.Id}", mapper.ToDto(p));
     }
 
     static async Task<Results<Ok<ProductoDto>, NotFound<ProblemDetails>, ValidationProblem>> Update(
-        int id, CrearProductoDto dto, IValidator<CrearProductoDto> validator)
+        int id, 
+        CrearProductoDto dto, 
+        IValidator<CrearProductoDto> validator,
+        ProductoMapper mapper)
     {
-        var result = await validator.ValidateAsync(dto);
+        ValidationResult? result = await validator.ValidateAsync(dto);
 
         if (!result.IsValid)
             return TypedResults.ValidationProblem(result.ToDictionary());
 
-        var p = _catalogo.FirstOrDefault(x => x.Id == id);
+        Producto? p = _catalogo.FirstOrDefault(x => x.Id == id);
 
         if (p is null)
             return TypedResults.NotFound(new ProblemDetails
@@ -107,12 +113,12 @@ public static class ProductosEndpoints
         p.Precio = dto.Precio;
         p.Stock = dto.Stock;
 
-        return TypedResults.Ok(ToDto(p));
+        return TypedResults.Ok(mapper.ToDto(p));
     }
 
     static Results<NoContent, NotFound<ProblemDetails>> Delete(int id)
     {
-        var p = _catalogo.FirstOrDefault(x => x.Id == id);
+        Producto? p = _catalogo.FirstOrDefault(x => x.Id == id);
 
         if (p is null)
             return TypedResults.NotFound(new ProblemDetails

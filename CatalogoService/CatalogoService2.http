@@ -1,0 +1,57 @@
+### catalogo2.http — Pruebas alternativas del CatalogoService ShopFlow
+@base = https://localhost:7027
+@v = v1
+
+### 1. Listar todo el catálogo (versionado)
+GET {{base}}/api/{{v}}/productos
+
+### 2. Filtrar por categoría Lacteos
+GET {{base}}/api/{{v}}/productos?categoria=Lacteos
+
+### 3. Obtener producto por ID existente
+GET {{base}}/api/{{v}}/productos/2
+
+### 4. Producto inexistente → 404 Problem Details
+GET {{base}}/api/{{v}}/productos/404
+
+### 5. Crear producto válido (datos distintos al archivo 1)
+POST {{base}}/api/{{v}}/productos
+Content-Type: application/json
+
+{
+  "nombre": "Café Molido 250g",
+  "descripcion": "Tueste medio, origen Colombia",
+  "categoria": "Bebidas",
+  "precio": 85.00,
+  "stock": 75
+}
+
+### 6. Crear producto con precio en cero (caso borde válido)
+POST {{base}}/api/{{v}}/productos
+Content-Type: application/json
+
+{
+  "nombre": "Muestra Gratis Galletas",
+  "descripcion": "Sin costo, stock promocional",
+  "categoria": "Botanitas",
+  "precio": 0,
+  "stock": 1
+}
+
+### 7. Actualizar producto existente
+PUT {{base}}/api/{{v}}/productos/2
+Content-Type: application/json
+
+{
+  "nombre": "Papas Fritas 180g (Edición Limitada)",
+  "descripcion": "Sabor jalapeño, bolsa con diseño nuevo",
+  "categoria": "Botanitas",
+  "precio": 21.50,
+  "stock": 250
+}
+
+### 8. Eliminar producto
+DELETE {{base}}/api/{{v}}/productos/4
+
+### 9. Health check
+GET {{base}}/health

@@ -1,20 +1,21 @@
 ### catalogo.http — Pruebas del CatalogoService ShopFlow
-@base = http://localhost:5001
+@base = http://localhost:7027
+@v = v1
 
 ### 1. Listar todo el catálogo
-GET {{base}}/api/productos
+GET {{base}}/api/{{v}}/productos
 
 ### 2. Filtrar solo Bebidas
-GET {{base}}/api/productos?categoria=Bebidas
+GET {{base}}/api/{{v}}/productos?categoria=Bebidas
 
 ### 3. Obtener producto por ID
-GET {{base}}/api/productos/1
+GET {{base}}/api/{{v}}/productos/1
 
 ### 4. Producto inexistente → 404 Problem Details
-GET {{base}}/api/productos/999
+GET {{base}}/api/{{v}}/productos/999
 
 ### 5. Crear producto válido
-POST {{base}}/api/productos
+POST {{base}}/api/{{v}}/productos
 Content-Type: application/json
 
 {
@@ -26,7 +27,7 @@ Content-Type: application/json
 }
 
 ### 6. Producto inválido → 400 ValidationProblem
-POST {{base}}/api/productos
+POST {{base}}/api/{{v}}/productos
 Content-Type: application/json
 
 {
@@ -38,7 +39,7 @@ Content-Type: application/json
 }
 
 ### 7. Actualizar producto
-PUT {{base}}/api/productos/1
+PUT {{base}}/api/{{v}}/productos/1
 Content-Type: application/json
 
 {
@@ -50,7 +51,7 @@ Content-Type: application/json
 }
 
 ### 8. Eliminar producto
-DELETE {{base}}/api/productos/3
+DELETE {{base}}/api/{{v}}/productos/3
 
 ### 9. Health check
 GET {{base}}/health

@@ -1,4 +1,7 @@
+using Asp.Versioning;
+using Asp.Versioning.Builder;
 using CatalogoService.Endpoints;
+using CatalogoService.Mappers;
 using FluentValidation;
 using Scalar.AspNetCore;
 
@@ -6,9 +9,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Integración con .NET Aspire (OpenTelemetry + Health Checks)
 builder.AddServiceDefaults();
+builder.Services.AddApiVersioning(opt =>
+{
+    opt.DefaultApiVersion = new ApiVersion(1);
+    opt.AssumeDefaultVersionWhenUnspecified = true;
+    opt.ApiVersionReader = new UrlSegmentApiVersionReader();
+}).AddApiExplorer(opt =>
+{
+    opt.GroupNameFormat = "'v'V";
+    opt.SubstituteApiVersionInUrl = true;
+});
 
 // Problem Details RFC 7807 — formato estándar de errores
 builder.Services.AddProblemDetails();
+
+// Mapperly 
+builder.Services.AddSingleton<ProductoMapper>();
 
 // FluentValidation — registra automáticamente todos los validators del proyecto
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -30,7 +46,10 @@ app.MapScalarApiReference(opt =>
     opt.Theme = ScalarTheme.BluePlanet;
 });
 
-// Registrar todos los endpoints del catálogo
-app.MapProductos();
+ApiVersionSet versionSet = app.NewApiVersionSet()
+    .HasApiVersion(new ApiVersion(1))
+    .Build();
+
+app.MapProductos().WithApiVersionSet(versionSet);
 
 await app.RunAsync();
