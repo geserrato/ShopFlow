@@ -1,4 +1,7 @@
 // OrdenesService/Program.cs
+
+using ShopFlow.ServiceDefaults;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();

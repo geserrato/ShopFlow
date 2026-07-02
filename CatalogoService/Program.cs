@@ -4,6 +4,7 @@ using CatalogoService.Endpoints;
 using CatalogoService.Mappers;
 using FluentValidation;
 using Scalar.AspNetCore;
+using ShopFlow.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
