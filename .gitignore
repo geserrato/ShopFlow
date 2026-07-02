@@ -183,3 +183,6 @@ bower_components/
 
 # Files that might be created on a WebDAV share
 .apdisk
+
+# Tooling caches (OpenCode / gentle-ai agent skill registry)
+.atl/
