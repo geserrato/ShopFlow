@@ -10,4 +10,5 @@ public class Producto
     public int Stock { get; set; }
     public bool Activo { get; set; } = true;
     public DateTime CreadoEn { get; set; } = DateTime.UtcNow;
+    public DateTime? ActualizadoEn { get; set; }
 }

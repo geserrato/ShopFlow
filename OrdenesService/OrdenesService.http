@@ -1,6 +1,39 @@
-@OrdenesService_HostAddress = http://localhost:5275
+@base = https://localhost:7101
 
-GET {{OrdenesService_HostAddress}}/weatherforecast/
-Accept: application/json
+### Paso 1 — Crear una orden de distribuidor mexicano
+### Ejecuta este primero y copia el "id" de la respuesta en @ordenId abajo
+POST {{base}}/ordenes
+Content-Type: application/json
+
+{
+  "clienteId": "dist-mx-001",
+  "items": [
+    { "productoId": "1", "cantidad": 24, "precio": 12.50 },
+    { "productoId": "4", "cantidad": 12, "precio": 22.00 }
+  ]
+}
+
+###
+ 
+### ── Copia el id de la respuesta anterior y pégalo aquí ──────────────
+@ordenId = e09a1e98-7453-4684-a46f-a648c8bb024d
+ 
+###
+ 
+### Paso 2 — Consultar la orden (CQRS Read Side)
+### Estado esperado: "Pendiente"
+GET {{base}}/ordenes/{{ordenId}}
+
+###
+ 
+### Paso 3 — Confirmar la orden (simula la Saga)
+### Estado esperado: 200 OK con estado "Confirmada"
+POST {{base}}/ordenes/{{ordenId}}/confirmar
+
+###
+ 
+### Paso 4 — Verificar el cambio de estado
+### Estado esperado: "Confirmada"
+GET {{base}}/ordenes/{{ordenId}}
 
 ###
